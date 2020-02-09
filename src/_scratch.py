@@ -1,10 +1,14 @@
+import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-
 # %matplotlib inline
+
+os.chdir(
+    "/Users/eklavya/projects/education/formalEducation/DataScience/DataScienceAssignments/HealthCare/Risk_Stratification/")
+
 
 # Until fuction: line seperator
 def print_ln():
@@ -18,7 +22,7 @@ def print_ln():
 # ==================
 
 # Loading in the dataset
-diabetic_patient_data_orig = pd.read_csv('../resources/diabetic_data.csv')
+diabetic_patient_data_orig = pd.read_csv('./resources/diabetic_data.csv')
 
 # Create a working copy
 diabetic_patient_data = diabetic_patient_data_orig.copy()
@@ -57,39 +61,97 @@ Remove redundant variables
 # diabetic_patient_data['weight'] = diabetic_patient_data['weight'].replace('?', np.nan)
 
 diabetic_patient_data = diabetic_patient_data.replace('?', np.nan)
+# diabetic_patient_data.to_csv("../_resources/diabetic_patient_data.csv", sep=',')
+
+
+# TODO
+"""
+Check for missing values and treat them accordingly.
+"""
+
+# Analyse the missing values
+diabetic_patient_data.isnull().sum()
+columns_with_missing_data = round(100 * (diabetic_patient_data.isnull().sum() / len(diabetic_patient_data.index)), 2)
+columns_with_missing_data[columns_with_missing_data >= 60]
+
+# DONE
+"""
+Change the variable 'readmitted' to binary type by clubbing the values ">30" and "<30" as "YES".
+"""
+
+diabetic_patient_data['readmitted'] = diabetic_patient_data['readmitted'].replace('>30', 'YES')
+diabetic_patient_data['readmitted'] = diabetic_patient_data['readmitted'].replace('<30', 'YES')
+
+# diabetic_patient_data.to_csv("../_resources/diabetic_patient_data.csv", sep=',')
+
 
 """
 Remove duplicated rows/columns
 """
 
-duplicated_data = diabetic_patient_data[diabetic_patient_data.duplicated()]  # seems like there is no duplicated data
+# NOTE seems like there is no duplicated data
 
-# TODO
-"""
-Check for missing values and treat them accordingly.
+# deduplicated_patient_data = diabetic_patient_data.drop_duplicates()
+# duplicated_data = diabetic_patient_data[diabetic_patient_data.duplicated()]
 
-"""
-
-# Analyse the missing values
-diabetic_patient_data.isnull().sum()  # seems like there is no missing data
+diabetic_patient_data = diabetic_patient_data.drop_duplicates()
 
 # TODO
 """
 Scale numeric attributes and create dummy variables for categorical ones.
-
 """
 
-# TODO
-"""
-Change the variable 'readmitted' to binary type by clubbing the values ">30" and "<30" as "YES".
+diabetic_patient_data_cat_features = ['race',
+                                      'gender',
+                                      'age',
+                                      'weight',
+                                      'payer_code',
+                                      'medical_specialty',
+                                      'diag_1',
+                                      'diag_2',
+                                      'diag_3',
+                                      'max_glu_serum',
+                                      'A1Cresult',
+                                      'metformin',
+                                      'repaglinide',
+                                      'nateglinide',
+                                      'chlorpropamide',
+                                      'glimepiride',
+                                      'acetohexamide',
+                                      'glipizide',
+                                      'glyburide',
+                                      'tolbutamide',
+                                      'pioglitazone',
+                                      'rosiglitazone',
+                                      'acarbose',
+                                      'miglitol',
+                                      'troglitazone',
+                                      'tolazamide',
+                                      'examide',
+                                      'citoglipton',
+                                      'insulin',
+                                      'glyburide-metformin',
+                                      'glipizide-metformin',
+                                      'glimepiride-pioglitazone',
+                                      'metformin-rosiglitazone',
+                                      'metformin-pioglitazone',
+                                      'change',
+                                      'diabetesMed',
+                                      'readmitted']
 
-"""
-
-# TODO
-"""
-Create the derived metric 'comorbidity', according to the following scheme -
-
-"""
+diabetic_patient_data_num_features = ['encounter_id',
+                                      'patient_nbr',
+                                      'admission_type_id',
+                                      'discharge_disposition_id',
+                                      'admission_source_id',
+                                      'time_in_hospital',
+                                      'num_lab_procedures',
+                                      'num_procedures',
+                                      'num_medications',
+                                      'number_outpatient',
+                                      'number_emergency',
+                                      'number_inpatient',
+                                      'number_diagnoses']
 
 # ==================
 # Data Exploration
