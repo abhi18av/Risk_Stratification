@@ -4,6 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+sns.set_style('whitegrid')
 # %matplotlib inline
 
 os.chdir(
@@ -36,24 +37,7 @@ print("Dataframe Info: \n")
 diabetic_patient_data.info()
 print_ln()
 
-
-# Identifying the numerical and categorical features
-def type_features(data):
-    categorical_features = data.select_dtypes(include=["object"]).columns
-    numerical_features = data.select_dtypes(exclude=["object"]).columns
-    print("categorical_features :", categorical_features)
-    print_ln()
-    print("numerical_features:", numerical_features)
-    print_ln()
-    return categorical_features, numerical_features
-
-
-diabetic_patient_data_cat_features, diabetic_patient_data_num_features = type_features(diabetic_patient_data)
-
-# diabetic_patient_data.var() # variance of the data-frame
-
-
-# TODO
+# DONE
 """
 Remove redundant variables
 """
@@ -64,21 +48,30 @@ diabetic_patient_data.head(5)
 # NOTE replace the `?` as `nan`
 # https://stackoverflow.com/questions/52643775/how-to-replace-specific-character-in-pandas-column-with-null
 
-# diabetic_patient_data['weight'] = diabetic_patient_data['weight'].replace('?', np.nan)
-
 diabetic_patient_data = diabetic_patient_data.replace('?', np.nan)
 # diabetic_patient_data.to_csv("../_resources/diabetic_patient_data.csv", sep=',')
 
 
-# TODO
+# DONE
 """
 Check for missing values and treat them accordingly.
 """
 
 # Analyse the missing values
-diabetic_patient_data.isnull().sum()
 columns_with_missing_data = round(100 * (diabetic_patient_data.isnull().sum() / len(diabetic_patient_data.index)), 2)
-columns_with_missing_data[columns_with_missing_data >= 60]
+columns_with_missing_data[columns_with_missing_data > 20].plot(kind='bar')
+plt.show()
+
+# Three columns have considerable data missing
+# - weight
+# - payer_code
+# - medical_speciality # TODO decide what to do
+
+# We can see that Weight column is almost completely empty and therefore can be dropped
+diabetic_patient_data = diabetic_patient_data.drop(['weight'], axis=1)
+
+# `payer_code` is redundant for our purpose, so we can drop that as well
+diabetic_patient_data = diabetic_patient_data.drop(['payer_code'], axis=1)
 
 # DONE
 """
@@ -102,6 +95,78 @@ Remove duplicated rows/columns
 
 diabetic_patient_data = diabetic_patient_data.drop_duplicates()
 
+
+# Identifying the numerical and categorical features
+def type_features(data):
+    categorical_features = data.select_dtypes(include=["object"]).columns
+    numerical_features = data.select_dtypes(exclude=["object"]).columns
+    print("categorical_features :", categorical_features)
+    print_ln()
+    print("numerical_features:", numerical_features)
+    print_ln()
+    return categorical_features, numerical_features
+
+
+diabetic_patient_data_cat_features, diabetic_patient_data_num_features = type_features(diabetic_patient_data)
+
+# TODO
+"""
+Perform basic data exploration for some numerical attributes
+"""
+
+diabetic_patient_data_num_features = [
+    # 'encounter_id',  # TODO can drop
+    # 'patient_nbr',  # TODO can drop
+    # 'admission_type_id',  # NOTE cat-encoded
+    # 'discharge_disposition_id',  # NOTE cat-encoded
+    # 'admission_source_id',  # NOTE cat-encoded
+    'time_in_hospital',
+    'num_lab_procedures',
+    'num_procedures',
+    'num_medications',
+    'number_outpatient',
+    'number_emergency',
+    'number_inpatient',
+    'number_diagnoses']
+
+diabetic_patient_data_num_features_df = diabetic_patient_data[diabetic_patient_data_num_features]
+
+diabetic_patient_data_num_features_df.describe()
+
+diabetic_patient_data_num_features_df.info()
+
+# NOTE Univariate analysis of some numerical attributes
+
+for a_num_feature in diabetic_patient_data_num_features:
+    sns.FacetGrid(diabetic_patient_data, hue='readmitted', size=6).map(sns.distplot, a_num_feature).add_legend()
+    plt.show()
+
+for a_num_feature in diabetic_patient_data_num_features:
+    sns.BarPlot(diabetic_patient_data, hue='readmitted', size=6).map(sns.distplot, a_num_feature).add_legend()
+    plt.show()
+
+# Pairplot
+
+diabetic_patient_data_num_features = [
+    # 'encounter_id',  # TODO can drop
+    # 'patient_nbr',  # TODO can drop
+    # 'admission_type_id',  # NOTE cat-encoded
+    # 'discharge_disposition_id',  # NOTE cat-encoded
+    # 'admission_source_id',  # NOTE cat-encoded
+    'readmitted',  # NOTE  add this for using with hue
+    'time_in_hospital',
+    'num_lab_procedures',
+    'num_procedures',
+    'num_medications',
+    'number_outpatient',
+    'number_emergency',
+    'number_inpatient',
+    'number_diagnoses']
+
+diabetic_patient_data_num_features_df = diabetic_patient_data[diabetic_patient_data_num_features]
+sns.pairplot(diabetic_patient_data_num_features_df, hue='readmitted').add_legend()
+plt.show()
+
 # TODO
 """
 Perform basic data exploration for some categorical attributes
@@ -110,15 +175,13 @@ Perform basic data exploration for some categorical attributes
 diabetic_patient_data_cat_features = ['race',
                                       'gender',
                                       'age',  # TODO find out how to deal with these age ranges
-                                      'weight',  # NOTE very sparse
-                                      'payer_code',  # TODO drop
-                                      'medical_specialty',
+                                      'medical_specialty',  # TODO  find out how to deal with this
                                       'diag_1',  # TODO find out how to deal with this
                                       'diag_2',  # TODO find out how to deal with this
                                       'diag_3',  # TODO find out how to deal with this
                                       'max_glu_serum',  # NOTE has low variance
                                       'A1Cresult',
-                                      # diabetes med start
+                                      # diabetes-med-start # TODO these could be dropped or encoded in 0 or 1
                                       'metformin',
                                       'repaglinide',
                                       'nateglinide',
@@ -142,28 +205,36 @@ diabetic_patient_data_cat_features = ['race',
                                       'glimepiride-pioglitazone',
                                       'metformin-rosiglitazone',
                                       'metformin-pioglitazone',
-                                      # diabetes med end
+                                      # diabetes-med-end
                                       'change',
                                       'diabetesMed',
                                       'readmitted']
 
-# TODO
-"""
-Perform basic data exploration for some numerical attributes
-"""
-diabetic_patient_data_num_features = ['encounter_id',
-                                      'patient_nbr',
-                                      'admission_type_id',
-                                      'discharge_disposition_id',
-                                      'admission_source_id',
-                                      'time_in_hospital',
-                                      'num_lab_procedures',
-                                      'num_procedures',
-                                      'num_medications',
-                                      'number_outpatient',
-                                      'number_emergency',
-                                      'number_inpatient',
-                                      'number_diagnoses']
+# for a_med in [
+#     'metformin',
+#     'repaglinide',
+#     'nateglinide',
+#     'chlorpropamide',
+#     'glimepiride',
+#     'acetohexamide',
+#     'glipizide',
+#     'glyburide',
+#     'tolbutamide',
+#     'pioglitazone',
+#     'rosiglitazone',
+#     'acarbose',
+#     'miglitol',
+#     'troglitazone',
+#     'tolazamide',
+#     'examide',
+#     'citoglipton',
+#     'insulin',
+#     'glyburide-metformin',
+#     'glipizide-metformin',
+#     'glimepiride-pioglitazone',
+#     'metformin-rosiglitazone',
+#     'metformin-pioglitazone']:
+#     print(diabetic_patient_data[a_med].value_counts())
 
 # ==================
 # Data preparation
