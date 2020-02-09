@@ -17,9 +17,11 @@ def print_ln():
 
 # pd.options.display.float_format = '{:.2f}'.format
 
+
 # ==================
-# Data preparation
+# Data Exploration
 # ==================
+
 
 # Loading in the dataset
 diabetic_patient_data_orig = pd.read_csv('./resources/diabetic_data.csv')
@@ -33,9 +35,6 @@ print_ln()
 print("Dataframe Info: \n")
 diabetic_patient_data.info()
 print_ln()
-
-# Inspecting the head of the dataset
-diabetic_patient_data.head(5)
 
 
 # Identifying the numerical and categorical features
@@ -51,10 +50,17 @@ def type_features(data):
 
 diabetic_patient_data_cat_features, diabetic_patient_data_num_features = type_features(diabetic_patient_data)
 
+# diabetic_patient_data.var() # variance of the data-frame
+
+
 # TODO
 """
 Remove redundant variables
 """
+
+# Inspecting the head of the dataset
+diabetic_patient_data.head(5)
+
 # NOTE replace the `?` as `nan`
 # https://stackoverflow.com/questions/52643775/how-to-replace-specific-character-in-pandas-column-with-null
 
@@ -84,7 +90,7 @@ diabetic_patient_data['readmitted'] = diabetic_patient_data['readmitted'].replac
 
 # diabetic_patient_data.to_csv("../_resources/diabetic_patient_data.csv", sep=',')
 
-
+# DONE
 """
 Remove duplicated rows/columns
 """
@@ -98,7 +104,7 @@ diabetic_patient_data = diabetic_patient_data.drop_duplicates()
 
 # TODO
 """
-Scale numeric attributes and create dummy variables for categorical ones.
+Perform basic data exploration for some categorical attributes
 """
 
 diabetic_patient_data_cat_features = ['race',
@@ -141,6 +147,10 @@ diabetic_patient_data_cat_features = ['race',
                                       'diabetesMed',
                                       'readmitted']
 
+# TODO
+"""
+Perform basic data exploration for some numerical attributes
+"""
 diabetic_patient_data_num_features = ['encounter_id',
                                       'patient_nbr',
                                       'admission_type_id',
@@ -155,21 +165,19 @@ diabetic_patient_data_num_features = ['encounter_id',
                                       'number_inpatient',
                                       'number_diagnoses']
 
-# diabetic_patient_data.var() # variance of the data-frame
-
 # ==================
-# Data Exploration
+# Data preparation
 # ==================
 
 
 # TODO
 """
-Perform basic data exploration for some categorical attributes
+Create dummy variables for categorical ones.
 """
 
 # TODO
 """
-Perform basic data exploration for some numerical attributes
+Scale numeric attributes and 
 """
 
 # ==================
@@ -181,6 +189,7 @@ Perform basic data exploration for some numerical attributes
 """
 Divide your data into training and testing dataset
 """
+
 # TODO
 """
 Train and compare the performance of at least two machine learning algorithms and decide which one to use for predicting risk of readmission for the patient.
