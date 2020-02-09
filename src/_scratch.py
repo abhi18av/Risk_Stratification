@@ -103,15 +103,16 @@ Scale numeric attributes and create dummy variables for categorical ones.
 
 diabetic_patient_data_cat_features = ['race',
                                       'gender',
-                                      'age',
-                                      'weight',
-                                      'payer_code',
+                                      'age',  # TODO find out how to deal with these age ranges
+                                      'weight',  # NOTE very sparse
+                                      'payer_code',  # TODO drop
                                       'medical_specialty',
-                                      'diag_1',
-                                      'diag_2',
-                                      'diag_3',
-                                      'max_glu_serum',
+                                      'diag_1',  # TODO find out how to deal with this
+                                      'diag_2',  # TODO find out how to deal with this
+                                      'diag_3',  # TODO find out how to deal with this
+                                      'max_glu_serum',  # NOTE has low variance
                                       'A1Cresult',
+                                      # diabetes med start
                                       'metformin',
                                       'repaglinide',
                                       'nateglinide',
@@ -135,6 +136,7 @@ diabetic_patient_data_cat_features = ['race',
                                       'glimepiride-pioglitazone',
                                       'metformin-rosiglitazone',
                                       'metformin-pioglitazone',
+                                      # diabetes med end
                                       'change',
                                       'diabetesMed',
                                       'readmitted']
@@ -152,6 +154,8 @@ diabetic_patient_data_num_features = ['encounter_id',
                                       'number_emergency',
                                       'number_inpatient',
                                       'number_diagnoses']
+
+# diabetic_patient_data.var() # variance of the data-frame
 
 # ==================
 # Data Exploration
@@ -180,24 +184,19 @@ Divide your data into training and testing dataset
 # TODO
 """
 Train and compare the performance of at least two machine learning algorithms and decide which one to use for predicting risk of readmission for the patient.
+Show important feature for each model is calculated.
 """
-# TODO
-"""
-Important feature for each model is calculated.
-"""
+
+# This seems like a classification problem. And I'll rely on two models
+# - Decision tree
+# - Logistic regression
+
+
 # TODO
 """
 Use trained model to stratify your population into 3 risk buckets:
-"""
-# TODO
-"""
-High risk (Probability of readmission >0.7)
-"""
-# TODO
-"""
-Medium risk (0.3 < Probability of readmission < 0.7)
-"""
-# TODO
-"""
-Low risk (Probability of readmission < 0.3)
+
+- High risk (Probability of readmission >0.7)
+- Medium risk (0.3 < Probability of readmission < 0.7)
+- Low risk (Probability of readmission < 0.3)
 """
