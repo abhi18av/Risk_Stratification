@@ -137,13 +137,13 @@ diabetic_patient_data_num_features_df.info()
 
 # NOTE Univariate analysis of some numerical attributes
 
-for a_num_feature in diabetic_patient_data_num_features:
-    sns.FacetGrid(diabetic_patient_data, hue='readmitted', size=6).map(sns.distplot, a_num_feature).add_legend()
-    plt.show()
-
-for a_num_feature in diabetic_patient_data_num_features:
-    sns.BarPlot(diabetic_patient_data, hue='readmitted', size=6).map(sns.distplot, a_num_feature).add_legend()
-    plt.show()
+# for a_num_feature in diabetic_patient_data_num_features:
+#     sns.FacetGrid(diabetic_patient_data, hue='readmitted', size=6).map(sns.distplot, a_num_feature).add_legend()
+#     plt.show()
+#
+# for a_num_feature in diabetic_patient_data_num_features:
+#     sns.BarPlot(diabetic_patient_data, hue='readmitted', size=6).map(sns.distplot, a_num_feature).add_legend()
+#     plt.show()
 
 # Pairplot
 
@@ -163,9 +163,23 @@ diabetic_patient_data_num_features = [
     'number_inpatient',
     'number_diagnoses']
 
-diabetic_patient_data_num_features_df = diabetic_patient_data[diabetic_patient_data_num_features]
-sns.pairplot(diabetic_patient_data_num_features_df, hue='readmitted').add_legend()
-plt.show()
+# diabetic_patient_data_num_features_df = diabetic_patient_data[diabetic_patient_data_num_features]
+# sns.pairplot(diabetic_patient_data_num_features_df, hue='readmitted').add_legend()
+# plt.show()
+
+
+# NOTE Bivariate analysis of some numerical attributes
+#
+# # Create correlation matrix
+# corr_matrix = telecom2.corr().abs()
+#
+# # Select upper triangle of correlation matrix
+# upper = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k=1).astype(np.bool))
+#
+# # Find index of feature columns with correlation greater than 0.80
+# high_corr_features = [column for column in upper.columns if any(upper[column] > 0.80)]
+#
+# print("HIGHLY CORRELATED FEATURES IN DATA SET:{}\n\n{}".format(len(high_corr_features), high_corr_features))
 
 # TODO
 """
@@ -176,9 +190,9 @@ diabetic_patient_data_cat_features = ['race',
                                       'gender',
                                       'age',  # TODO find out how to deal with these age ranges
                                       'medical_specialty',  # TODO  find out how to deal with this
-                                      'diag_1',  # TODO find out how to deal with this
-                                      'diag_2',  # TODO find out how to deal with this
-                                      'diag_3',  # TODO find out how to deal with this
+                                      # 'diag_1',  # NOTE cat-encoded
+                                      # 'diag_2',  # NOTE cat-encoded
+                                      # 'diag_3',  # NOTE cat-encoded
                                       'max_glu_serum',  # NOTE has low variance
                                       'A1Cresult',
                                       # diabetes-med-start # TODO these could be dropped or encoded in 0 or 1
@@ -208,7 +222,8 @@ diabetic_patient_data_cat_features = ['race',
                                       # diabetes-med-end
                                       'change',
                                       'diabetesMed',
-                                      'readmitted']
+                                      # 'readmitted'
+                                      ]
 
 # for a_med in [
 #     'metformin',
@@ -236,6 +251,12 @@ diabetic_patient_data_cat_features = ['race',
 #     'metformin-pioglitazone']:
 #     print(diabetic_patient_data[a_med].value_counts())
 
+
+for a_cat_feat in diabetic_patient_data_cat_features:
+    print(diabetic_patient_data[a_cat_feat].value_counts().count())
+    print(diabetic_patient_data[a_cat_feat].value_counts())
+    print_ln()
+
 # ==================
 # Data preparation
 # ==================
@@ -246,26 +267,10 @@ diabetic_patient_data_cat_features = ['race',
 Create dummy variables for categorical ones.
 """
 
-# Create dummy variables for all the six categorial variables
-night_pck_user_6_s = pd.get_dummies(telecom['night_pck_user_6'], prefix="night6", drop_first=True)
-night_pck_user_7_s = pd.get_dummies(telecom['night_pck_user_7'], prefix="night7", drop_first=True)
-night_pck_user_8_s = pd.get_dummies(telecom['night_pck_user_8'], prefix="night8", drop_first=True)
-
-fb_user_6_s = pd.get_dummies(telecom['fb_user_6'], prefix="fb6", drop_first=True)
-fb_user_7_s = pd.get_dummies(telecom['fb_user_7'], prefix="fb7", drop_first=True)
-fb_user_8_s = pd.get_dummies(telecom['fb_user_8'], prefix="fb8", drop_first=True)
-
-telecom = pd.concat([telecom, night_pck_user_6_s], axis=1)
-telecom = pd.concat([telecom, night_pck_user_7_s], axis=1)
-telecom = pd.concat([telecom, night_pck_user_8_s], axis=1)
-
-telecom = pd.concat([telecom, fb_user_6_s], axis=1)
-telecom = pd.concat([telecom, fb_user_7_s], axis=1)
-telecom = pd.concat([telecom, fb_user_8_s], axis=1)
-
-# drop all categorial columns
-telecom = telecom.drop(
-    ['fb_user_6', 'fb_user_7', 'fb_user_8', 'night_pck_user_6', 'night_pck_user_7', 'night_pck_user_8'], 1)
+# NOTE only encode variables which are non-binary
+# change_s = pd.get_dummies(diabetic_patient_data['change'], prefix="change", drop_first=True)
+# diabetic_patient_data = pd.concat([diabetic_patient_data, change_s], axis=1)
+# diabetic_patient_data = diabetic_patient_data.drop(['change'], 1)
 
 # TODO
 """
@@ -275,12 +280,13 @@ Scale numeric attributes
 # scaling the features
 from sklearn.preprocessing import scale
 
-# storing column names in cols, since column names are (annoyingly) lost after
-# scaling (the df is converted to a numpy array)
-cols = X.columns
-X = pd.DataFrame(scale(X))
-X.columns = cols
-X.columns
+#
+# # storing column names in cols, since column names are (annoyingly) lost after
+# # scaling (the df is converted to a numpy array)
+# cols = X.columns
+# X = pd.DataFrame(scale(X))
+# X.columns = cols
+# X.columns
 
 # ==================
 # Model Building
@@ -292,12 +298,12 @@ X.columns
 Divide your data into training and testing dataset
 """
 
-# split into train and test
-from sklearn.cross_validation import train_test_split
-
-X_train, X_test, y_train, y_test = train_test_split(X, y,
-                                                    train_size=0.7,
-                                                    test_size=0.3, random_state=100)
+# # split into train and test
+# from sklearn.model_selection import train_test_split
+#
+# X_train, X_test, y_train, y_test = train_test_split(X, y,
+#                                                     train_size=0.7,
+#                                                     test_size=0.3, random_state=100)
 
 # TODO
 """
