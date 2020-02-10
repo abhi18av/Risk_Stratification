@@ -135,6 +135,11 @@ diabetic_patient_data_num_features_df.describe()
 
 diabetic_patient_data_num_features_df.info()
 
+# Checking whether data is imbalanced or not
+readmitted_df = diabetic_patient_data["readmitted"].value_counts()
+
+diabetic_patient_data_rate = readmitted_df[1] / (readmitted_df[1] + readmitted_df[0])
+
 # NOTE Univariate analysis of some numerical attributes
 
 for a_num_feature in diabetic_patient_data_num_features:
