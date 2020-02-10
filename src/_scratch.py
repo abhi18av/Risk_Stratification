@@ -49,6 +49,8 @@ diabetic_patient_data.head(5)
 # https://stackoverflow.com/questions/52643775/how-to-replace-specific-character-in-pandas-column-with-null
 
 diabetic_patient_data = diabetic_patient_data.replace('?', np.nan)
+diabetic_patient_data['medical_specialty'].replace({np.nan: 'Unknown'}, inplace=True)
+
 # diabetic_patient_data.to_csv("../_resources/diabetic_patient_data.csv", sep=',')
 
 
@@ -282,13 +284,23 @@ Scale numeric attributes
 # scaling the features
 from sklearn.preprocessing import scale
 
-#
-# # storing column names in cols, since column names are (annoyingly) lost after
-# # scaling (the df is converted to a numpy array)
-# cols = X.columns
-# X = pd.DataFrame(scale(X))
-# X.columns = cols
-# X.columns
+# storing column names in cols, since column names are (annoyingly) lost after
+# scaling (the df is converted to a numpy array)
+cols = diabetic_patient_data_num_features_df.columns
+diabetic_patient_data_num_features_df = pd.DataFrame(scale(diabetic_patient_data_num_features_df))
+diabetic_patient_data_num_features_df.columns = cols
+
+diabetic_patient_data_num_features_df.head()
+
+# NOTE using std_scaler
+
+from sklearn import preprocessing
+
+std_scale = preprocessing.StandardScaler().fit(diabetic_patient_data_num_features_df)
+df_std = std_scale.transform(diabetic_patient_data_num_features_df)
+
+minmax_scale = preprocessing.MinMaxScaler().fit(diabetic_patient_data_num_features_df)
+df_minmax = minmax_scale.transform(diabetic_patient_data_num_features_df)
 
 # ==================
 # Model Building
