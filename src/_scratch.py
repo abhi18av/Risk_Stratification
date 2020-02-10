@@ -159,3 +159,53 @@ for a_cat_feat in diabetic_patient_data_cat_features:
     tmp = pd.get_dummies(diabetic_patient_data[a_cat_feat], prefix=a_cat_feat, drop_first=True)
     diabetic_patient_data = pd.concat([diabetic_patient_data, tmp], axis=1)
     diabetic_patient_data = diabetic_patient_data.drop([a_cat_feat], 1)
+
+diabetic_patient_data.info()
+
+
+def final_cleanup(df):
+    df.dropna(inplace=True)
+    indices_to_keep = ~df.isin([np.nan, np.inf, -np.inf]).any(1)
+    return df[indices_to_keep].astype(np.float64)
+
+
+final_cleanup(diabetic_patient_data)
+
+# DONE
+"""
+Split the cleansed dataset for the analysis
+"""
+
+from sklearn.model_selection import train_test_split
+
+y = diabetic_patient_data.loc[:, 'readmitted_YES']
+X = diabetic_patient_data.loc[:, diabetic_patient_data.columns != 'readmitted_YES']
+
+X_train, X_test, y_train, y_test = train_test_split(X, y,
+                                                    train_size=0.7,
+                                                    test_size=0.3, random_state=100)
+
+# TODO
+"""
+Build a decision tree model
+"""
+
+# Importing decision tree classifier from sklearn library
+from sklearn.tree import DecisionTreeClassifier
+
+# Fitting the decision tree with default hyperparameters, apart from
+# max_depth which is 5 so that we can plot and read the tree.
+dt_default = DecisionTreeClassifier(max_depth=5)
+
+dt_default.fit(X_train, y_train)
+
+# Let's check the evaluation metrics of our default model
+
+# Importing classification report and confusion matrix from sklearn metrics
+from sklearn.metrics import classification_report, confusion_matrix
+
+# Making predictions
+y_pred_default = dt_default.predict(X_test)
+
+# Printing classification report
+print(classification_report(y_test, y_pred_default))
