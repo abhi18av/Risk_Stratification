@@ -11,7 +11,7 @@ os.chdir(
     "/Users/eklavya/projects/education/formalEducation/DataScience/DataScienceAssignments/HealthCare/Risk_Stratification/")
 
 
-# Until fuction: line seperator
+# Util fuction: line seperator
 def print_ln():
     print('-' * 80, '\n')
 
@@ -59,8 +59,8 @@ Check for missing values and treat them accordingly.
 
 # Analyse the missing values
 columns_with_missing_data = round(100 * (diabetic_patient_data.isnull().sum() / len(diabetic_patient_data.index)), 2)
-columns_with_missing_data[columns_with_missing_data > 20].plot(kind='bar')
-plt.show()
+# columns_with_missing_data[columns_with_missing_data > 20].plot(kind='bar')
+# plt.show()
 
 # Three columns have considerable data missing
 # - weight
@@ -137,13 +137,9 @@ diabetic_patient_data_num_features_df.info()
 
 # NOTE Univariate analysis of some numerical attributes
 
-# for a_num_feature in diabetic_patient_data_num_features:
-#     sns.FacetGrid(diabetic_patient_data, hue='readmitted', size=6).map(sns.distplot, a_num_feature).add_legend()
-#     plt.show()
-#
-# for a_num_feature in diabetic_patient_data_num_features:
-#     sns.BarPlot(diabetic_patient_data, hue='readmitted', size=6).map(sns.distplot, a_num_feature).add_legend()
-#     plt.show()
+for a_num_feature in diabetic_patient_data_num_features:
+    sns.FacetGrid(diabetic_patient_data, hue='readmitted', size=6).map(sns.distplot, a_num_feature).add_legend()
+    plt.show()
 
 # Pairplot
 
@@ -189,7 +185,7 @@ Perform basic data exploration for some categorical attributes
 diabetic_patient_data_cat_features = ['race',
                                       'gender',
                                       'age',  # TODO find out how to deal with these age ranges
-                                      'medical_specialty',  # TODO  find out how to deal with this
+                                      # 'medical_specialty',  # TODO  find out how to deal with this
                                       # 'diag_1',  # NOTE cat-encoded
                                       # 'diag_2',  # NOTE cat-encoded
                                       # 'diag_3',  # NOTE cat-encoded
@@ -268,9 +264,10 @@ Create dummy variables for categorical ones.
 """
 
 # NOTE only encode variables which are non-binary
-# change_s = pd.get_dummies(diabetic_patient_data['change'], prefix="change", drop_first=True)
-# diabetic_patient_data = pd.concat([diabetic_patient_data, change_s], axis=1)
-# diabetic_patient_data = diabetic_patient_data.drop(['change'], 1)
+
+diabetic_patient_data_cat_features_df = diabetic_patient_data[diabetic_patient_data_cat_features]
+diabetic_patient_data_cat_features_dummies_df = pd.get_dummies(diabetic_patient_data_cat_features_df, drop_first=True)
+diabetic_patient_data_cat_features_dummies_df
 
 # TODO
 """
