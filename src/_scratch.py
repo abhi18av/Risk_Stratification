@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 sns.set_style('whitegrid')
-# %matplotlib inline
 
 os.chdir(
     "/Users/eklavya/projects/education/formalEducation/DataScience/DataScienceAssignments/HealthCare/Risk_Stratification/")
@@ -14,9 +13,6 @@ os.chdir(
 # Util fuction: line seperator
 def print_ln():
     print('-' * 80, '\n')
-
-
-# pd.options.display.float_format = '{:.2f}'.format
 
 
 # ==================
@@ -37,61 +33,18 @@ print("Dataframe Info: \n")
 diabetic_patient_data.info()
 print_ln()
 
-# DONE
-"""
-Remove redundant variables
-"""
-
-# Inspecting the head of the dataset
-diabetic_patient_data.head(5)
-
-# NOTE replace the `?` as `nan`
-# https://stackoverflow.com/questions/52643775/how-to-replace-specific-character-in-pandas-column-with-null
-
 diabetic_patient_data = diabetic_patient_data.replace('?', np.nan)
-# diabetic_patient_data.to_csv("../_resources/diabetic_patient_data.csv", sep=',')
+diabetic_patient_data['medical_specialty'].replace({np.nan: 'Unknown'}, inplace=True)
 
-
-# DONE
-"""
-Check for missing values and treat them accordingly.
-"""
-
-# Analyse the missing values
-columns_with_missing_data = round(100 * (diabetic_patient_data.isnull().sum() / len(diabetic_patient_data.index)), 2)
-# columns_with_missing_data[columns_with_missing_data > 20].plot(kind='bar')
-# plt.show()
-
-# Three columns have considerable data missing
-# - weight
-# - payer_code
-# - medical_speciality # TODO decide what to do
-
-# We can see that Weight column is almost completely empty and therefore can be dropped
+diabetic_patient_data = diabetic_patient_data.drop(['encounter_id'], axis=1)
+diabetic_patient_data = diabetic_patient_data.drop(['patient_nbr'], axis=1)
 diabetic_patient_data = diabetic_patient_data.drop(['weight'], axis=1)
-
-# `payer_code` is redundant for our purpose, so we can drop that as well
 diabetic_patient_data = diabetic_patient_data.drop(['payer_code'], axis=1)
 
-# DONE
-"""
-Change the variable 'readmitted' to binary type by clubbing the values ">30" and "<30" as "YES".
-"""
+diabetic_patient_data = diabetic_patient_data.drop(['diag_1', 'diag_2', 'diag_3'], axis=1)
 
 diabetic_patient_data['readmitted'] = diabetic_patient_data['readmitted'].replace('>30', 'YES')
 diabetic_patient_data['readmitted'] = diabetic_patient_data['readmitted'].replace('<30', 'YES')
-
-# diabetic_patient_data.to_csv("../_resources/diabetic_patient_data.csv", sep=',')
-
-# DONE
-"""
-Remove duplicated rows/columns
-"""
-
-# NOTE seems like there is no duplicated data
-
-# deduplicated_patient_data = diabetic_patient_data.drop_duplicates()
-# duplicated_data = diabetic_patient_data[diabetic_patient_data.duplicated()]
 
 diabetic_patient_data = diabetic_patient_data.drop_duplicates()
 
@@ -115,11 +68,6 @@ Perform basic data exploration for some numerical attributes
 """
 
 diabetic_patient_data_num_features = [
-    # 'encounter_id',  # TODO can drop
-    # 'patient_nbr',  # TODO can drop
-    # 'admission_type_id',  # NOTE cat-encoded
-    # 'discharge_disposition_id',  # NOTE cat-encoded
-    # 'admission_source_id',  # NOTE cat-encoded
     'time_in_hospital',
     'num_lab_procedures',
     'num_procedures',
@@ -140,48 +88,6 @@ readmitted_df = diabetic_patient_data["readmitted"].value_counts()
 
 diabetic_patient_data_rate = readmitted_df[1] / (readmitted_df[1] + readmitted_df[0])
 
-# NOTE Univariate analysis of some numerical attributes
-
-for a_num_feature in diabetic_patient_data_num_features:
-    sns.FacetGrid(diabetic_patient_data, hue='readmitted', size=6).map(sns.distplot, a_num_feature).add_legend()
-    plt.show()
-
-# Pairplot
-
-diabetic_patient_data_num_features = [
-    # 'encounter_id',  # TODO can drop
-    # 'patient_nbr',  # TODO can drop
-    # 'admission_type_id',  # NOTE cat-encoded
-    # 'discharge_disposition_id',  # NOTE cat-encoded
-    # 'admission_source_id',  # NOTE cat-encoded
-    'readmitted',  # NOTE  add this for using with hue
-    'time_in_hospital',
-    'num_lab_procedures',
-    'num_procedures',
-    'num_medications',
-    'number_outpatient',
-    'number_emergency',
-    'number_inpatient',
-    'number_diagnoses']
-
-# diabetic_patient_data_num_features_df = diabetic_patient_data[diabetic_patient_data_num_features]
-# sns.pairplot(diabetic_patient_data_num_features_df, hue='readmitted').add_legend()
-# plt.show()
-
-
-# NOTE Bivariate analysis of some numerical attributes
-#
-# # Create correlation matrix
-# corr_matrix = telecom2.corr().abs()
-#
-# # Select upper triangle of correlation matrix
-# upper = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k=1).astype(np.bool))
-#
-# # Find index of feature columns with correlation greater than 0.80
-# high_corr_features = [column for column in upper.columns if any(upper[column] > 0.80)]
-#
-# print("HIGHLY CORRELATED FEATURES IN DATA SET:{}\n\n{}".format(len(high_corr_features), high_corr_features))
-
 # TODO
 """
 Perform basic data exploration for some categorical attributes
@@ -189,14 +95,11 @@ Perform basic data exploration for some categorical attributes
 
 diabetic_patient_data_cat_features = ['race',
                                       'gender',
-                                      'age',  # TODO find out how to deal with these age ranges
-                                      # 'medical_specialty',  # TODO  find out how to deal with this
-                                      # 'diag_1',  # NOTE cat-encoded
-                                      # 'diag_2',  # NOTE cat-encoded
-                                      # 'diag_3',  # NOTE cat-encoded
-                                      'max_glu_serum',  # NOTE has low variance
+                                      'age',
+                                      'medical_specialty',
+                                      'max_glu_serum',
                                       'A1Cresult',
-                                      # diabetes-med-start # TODO these could be dropped or encoded in 0 or 1
+                                      # diabetes-med-start
                                       'metformin',
                                       'repaglinide',
                                       'nateglinide',
@@ -223,34 +126,8 @@ diabetic_patient_data_cat_features = ['race',
                                       # diabetes-med-end
                                       'change',
                                       'diabetesMed',
-                                      # 'readmitted'
+                                      'readmitted'
                                       ]
-
-# for a_med in [
-#     'metformin',
-#     'repaglinide',
-#     'nateglinide',
-#     'chlorpropamide',
-#     'glimepiride',
-#     'acetohexamide',
-#     'glipizide',
-#     'glyburide',
-#     'tolbutamide',
-#     'pioglitazone',
-#     'rosiglitazone',
-#     'acarbose',
-#     'miglitol',
-#     'troglitazone',
-#     'tolazamide',
-#     'examide',
-#     'citoglipton',
-#     'insulin',
-#     'glyburide-metformin',
-#     'glipizide-metformin',
-#     'glimepiride-pioglitazone',
-#     'metformin-rosiglitazone',
-#     'metformin-pioglitazone']:
-#     print(diabetic_patient_data[a_med].value_counts())
 
 
 for a_cat_feat in diabetic_patient_data_cat_features:
@@ -262,19 +139,7 @@ for a_cat_feat in diabetic_patient_data_cat_features:
 # Data preparation
 # ==================
 
-
-# TODO
-"""
-Create dummy variables for categorical ones.
-"""
-
-# NOTE only encode variables which are non-binary
-
-diabetic_patient_data_cat_features_df = diabetic_patient_data[diabetic_patient_data_cat_features]
-diabetic_patient_data_cat_features_dummies_df = pd.get_dummies(diabetic_patient_data_cat_features_df, drop_first=True)
-diabetic_patient_data_cat_features_dummies_df
-
-# TODO
+# DONE
 """
 Scale numeric attributes 
 """
@@ -282,47 +147,65 @@ Scale numeric attributes
 # scaling the features
 from sklearn.preprocessing import scale
 
-#
-# # storing column names in cols, since column names are (annoyingly) lost after
-# # scaling (the df is converted to a numpy array)
-# cols = X.columns
-# X = pd.DataFrame(scale(X))
-# X.columns = cols
-# X.columns
+for a_num_feat in diabetic_patient_data_num_features:
+    diabetic_patient_data[a_num_feat] = pd.DataFrame(scale(diabetic_patient_data[a_num_feat]))
 
-# ==================
-# Model Building
-# ==================
+# DONE
+"""
+Create dummy for categorical attributes 
+"""
 
+for a_cat_feat in diabetic_patient_data_cat_features:
+    tmp = pd.get_dummies(diabetic_patient_data[a_cat_feat], prefix=a_cat_feat, drop_first=True)
+    diabetic_patient_data = pd.concat([diabetic_patient_data, tmp], axis=1)
+    diabetic_patient_data = diabetic_patient_data.drop([a_cat_feat], 1)
+
+diabetic_patient_data.info()
+
+
+def final_cleanup(df):
+    df.dropna(inplace=True)
+    indices_to_keep = ~df.isin([np.nan, np.inf, -np.inf]).any(1)
+    return df[indices_to_keep].astype(np.float64)
+
+
+final_cleanup(diabetic_patient_data)
+
+# DONE
+"""
+Split the cleansed dataset for the analysis
+"""
+
+from sklearn.model_selection import train_test_split
+
+y = diabetic_patient_data.loc[:, 'readmitted_YES']
+X = diabetic_patient_data.loc[:, diabetic_patient_data.columns != 'readmitted_YES']
+
+X_train, X_test, y_train, y_test = train_test_split(X, y,
+                                                    train_size=0.7,
+                                                    test_size=0.3, random_state=100)
 
 # TODO
 """
-Divide your data into training and testing dataset
+Build a decision tree model
 """
 
-# # split into train and test
-# from sklearn.model_selection import train_test_split
-#
-# X_train, X_test, y_train, y_test = train_test_split(X, y,
-#                                                     train_size=0.7,
-#                                                     test_size=0.3, random_state=100)
+# Importing decision tree classifier from sklearn library
+from sklearn.tree import DecisionTreeClassifier
 
-# TODO
-"""
-Train and compare the performance of at least two machine learning algorithms and decide which one to use for predicting risk of readmission for the patient.
-Show important feature for each model is calculated.
-"""
+# Fitting the decision tree with default hyperparameters, apart from
+# max_depth which is 5 so that we can plot and read the tree.
+dt_default = DecisionTreeClassifier(max_depth=5)
 
-# This seems like a classification problem. And I'll rely on two models
-# - Decision tree
-# - Logistic regression
+dt_default.fit(X_train, y_train)
 
+# Let's check the evaluation metrics of our default model
 
-# TODO
-"""
-Use trained model to stratify your population into 3 risk buckets:
+# Importing classification report and confusion matrix from sklearn metrics
+from sklearn.metrics import classification_report, confusion_matrix
 
-- High risk (Probability of readmission >0.7)
-- Medium risk (0.3 < Probability of readmission < 0.7)
-- Low risk (Probability of readmission < 0.3)
-"""
+# Making predictions
+y_pred_default = dt_default.predict(X_test)
+
+# Printing classification report
+print(classification_report(y_test, y_pred_default))
